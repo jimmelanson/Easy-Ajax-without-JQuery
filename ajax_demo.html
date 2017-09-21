@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Easy Ajax Demo Page</title>
+     <script type="text/javascript" src="ajax.js"></script> 
+     <script>
+   // ################# STRINGS #################
+
+  function printStringToElement(dataString, targetIdName) {
+    document.getElementById(targetIdName).innerHTML = dataString;
+  }
+
+  function printListAsString(dataString, targetIdName) {
+    var resultsArr = dataString.split(",");
+    document.getElementById(targetIdName).innerHTML = '';
+    for(i = 0; i < resultsArr.length; i++) {
+        document.getElementById(targetIdName).innerHTML = document.getElementById(targetIdName).innerHTML + resultsArr[i] + ",";
+    }
+  }
+
+  function printListWithBreaks(dataString, targetIdName) {
+    var resultsArr = dataString.split(",");
+    document.getElementById(targetIdName).innerHTML = '';
+    for(i = 0; i < resultsArr.length; i++) {
+        document.getElementById(targetIdName).innerHTML = document.getElementById(targetIdName).innerHTML + resultsArr[i] + "<br />";
+    }
+  }
+  
+  
+  // ################## JSON ##################
+  
+  function processOnePerson(dataJSON, targetIdName) {
+    var jsonArr = JSON.parse(dataJSON);
+    document.getElementById(targetIdName).innerHTML = '';
+    document.getElementById(targetIdName).innerHTML = jsonArr[0].fname + ' ' + jsonArr[0].lname + ', ' + jsonArr[0].badge;
+  }
+  
+  function processMultiplePeople(dataJSON, targetIdName) {
+    var jsonArr = JSON.parse(dataJSON);
+    document.getElementById(targetIdName).innerHTML = '';
+    for(i = 0; i < jsonArr.length; i++) {
+      document.getElementById(targetIdName).innerHTML = document.getElementById(targetIdName).innerHTML + jsonArr[i].fname + ' ' + jsonArr[i].lname + ', ' + jsonArr[i].badge + '<br />';
+    }
+  }
+  
+ function processNestedObjectOfObjects(dataJSON, targetIdName) {
+    var jsonData = JSON.parse(dataJSON);
+    var results = "";
+    for(i = 1; i <= 4; i++) {
+        results = results + jsonData['response'+i].name.fname + ' ' + jsonData['response'+i].name.lname + ', ' + jsonData['response'+i].badge + ', ' + jsonData['response'+i].platoon + '<br />';
+    }
+    document.getElementById(targetIdName).innerHTML = results
+ }
+
+ function processNestedObjectOfObjectsUnknownLength(dataJSON, targetIdName) {
+    var jsonData = JSON.parse(dataJSON);
+    var results = "";
+    var iterator = 1; //I know that the returned JSON starts number at 1 and not at zero.
+    while(typeof jsonData['response'+iterator] !== "undefined") {
+      results = results + jsonData['response'+iterator].name.fname + ' ' + jsonData['response'+iterator].name.lname + ', ' + jsonData['response'+iterator].badge + ', ' + jsonData['response'+iterator].platoon + '<br />';
+      iterator++;
+      if(iterator > 10) {
+        return;
+      }
+    }
+    document.getElementById(targetIdName).innerHTML = results
+ }
+ 
+ 
+  
+    </script>
+  </head>
+  <body>
+  <span style="font-weight:bold;">AJAX Demo Page</span>
+  <br /><br />
+  <span style="font-weight: bold;">Retrieve value based on user input (string):</span>
+  <br />
+  (To test, enter 44444 or 55555 in the text field. This demo uses "ajax_test1.cgi")
+  <br />
+  <form><input type="text" name="field1" id="field1" value="" />
+  <a href="#" onclick="loadStringToFunction('/cgi-bin/ajax_demo/ajax_test1.cgi?id='+document.getElementById('field1').value+'&pid=$$','printStringToElement','showName');">Show Information</a>
+  <br />
+  <span id="showName"></span>
+  <br /><br /><br />
+  
+
+
+  <span style="font-weight: bold;">Retrieve comma separated list (string):</span>
+  <br />
+  (Converts string to list, then handles it as a list. This demo uses "ajax_test2.cgi")
+  <br />
+  <a href="#" onclick="loadStringToFunction('/cgi-bin/ajax_demo/ajax_test2.cgi', 'printListAsString', 'showList');">Show colour list</a> | <a href="#" onclick="loadStringToFunction('/cgi-bin/ajax_demo/ajax_test2.cgi', 'printListWithBreaks', 'showList');">Show colour list w/breaks</a>
+  <br />
+  <span id="showList"></span>
+  <br /><br /><br />
+  
+  
+  <span style="font-weight: bold;">Retrieve record for one person (JSON):</span>
+  <br />
+  (Handled as an array/list [with a single element] of objects. This demo uses "ajax_test_json1.cgi")
+  <br />
+  <a href="#" onclick="loadJSONToFunction('/cgi-bin/ajax_demo/ajax_test_json1.cgi','processOnePerson','showPerson');">Show One Person from JSON List</a>
+  <br />
+  <span id="showPerson"></span>
+  <br /><br /><br />
+  
+  
+  <span style="font-weight: bold;">Retrieve record for multiple people (JSON):</span>
+  <br />
+  (Handled as an array/list [with multiple elements] of objects. This demo uses "ajax_test_json2.cgi")
+  <br />
+  <a href="#" onclick="loadJSONToFunction('/cgi-bin/ajax_demo/ajax_test_json2.cgi', 'processMultiplePeople', 'showMultiplePeople');">Show Multiple People from JSON</a>
+  <br />
+  <span id="showMultiplePeople"></span>
+  <br /><br /><br />
+  
+  
+  <span style="font-weight: bold;">Retrieve record for multiple people (JSON):</span>
+  <br />
+  (Handled as objects of objects. This demo uses "ajax_test_json3.cgi" and "ajax_test_json4.cgi")
+  <br />
+  <a href="#" onclick="loadJSONToFunction('/cgi-bin/ajax_demo/ajax_test_json3.cgi', 'processNestedObjectOfObjects', 'showNestedPeople');">Show ObjectOfObjects of Person from JSON (ajax_test_json3.cgi)</a> |  <a href="#" onclick="loadJSONToFunction('/cgi-bin/ajax_demo/ajax_test_json4.cgi', 'processNestedObjectOfObjectsUnknownLength', 'showNestedPeople');">Show ObjectOfObjects of Person from JSON, Unknown Number of Elements (ajax_test_json4.cgi)</a>
+  <br />
+  <span id="showNestedPeople"></span>
+  <br /><br /><br />
+
+  <hr>
+  <br /><br />
+  <span style="font-weight: bold;">ajax.js:</span>
+  <p>Implementing ajax without using JQuery is easy if you aren't doing anything fancy. All you need to do is make the request, received the data, then display it.</p>
+  
+  <p>To do this, I've create a very small javascript file that has two functions in it. One receives a plain/text or text/html string. The other receives a text return
+  encoded as application/json. Once the data is back to you, then it is up to you to process it.</p>
+  
+  <p>As I was learning to do this, I found it frustrating I'd have to use multiple request functions to process different data in different ways. That's when I fell
+  back on the old programmers standard of being as lazy as possible.</p>
+  
+  <p>Because of my inherent laziness, the functions that make the ajax request and return the data allow you to specify three parameters that will let you process
+  the data anyway that you want.</p>
+  <br />
+  
+  <p><span style="font-weight:bold;">Structure of your STRING request:</span></p>
+  <pre><code>
+&lt;a href="#" onclick="loadStringToFunction('/path/to/source/file.whatever', 'nameOfTheFunctionYouCrateToHandleTheData', 'targetToDisplayTheData');"&gt;Text Link&lt;/a&gt;
+  </code></pre>
+  <p>In the above function call, I am making a request from a server file (first argument) that will be processed by the function I created (second argument) and then displayed in a span element (third argument) on my page.</p>
+  <br /><br /><br />
+  
+  <p><span style="font-weight:bold;">Structure of your data processing function for STRINGS:</span></p>
+  <p>The function I create will have this structure:</p>
+  <pre><code>
+  function nameOfTheFunctionYouCrateToHandleTheData(dataString, targetIdName) {
+    document.getElementById(targetIdName).innerHTML = dataString;
+  }
+  ...
+  &lt;span id="targetToDisplayTheData"&gt;&lt;/span&gt;
+  </code></pre>
+  <p>When I created this library, my project had many calls on the page that loaded simple data into a bunch of different fields. If you prefer, you can skip the third
+  argument in your request and hardcode the targets in your custom function. You can also hardcode your source URL in the ajax.js file, but remember that will mean
+  you have to create multiple request functions for different datasets.
+  <br /><br /><br />
+    
+   
+  <p><span style="font-weight:bold;">Structure of your JSON request:</span></p>
+  <pre><code>
+&lt;a href="#" onclick="loadStringToFunction('/path/to/source/file.whatever', 'nameOfTheFunctionYouCrateToHandleTheData', 'targetToDisplayTheData');"&gt;Text Link&lt;/a&gt;
+  </code></pre>
+  <p>This function call is almost identical to the one for strings. The only thing that changes is the function name.</p>
+  <br /><br /><br />
+  
+
+  <p><span style="font-weight:bold;">Structure of your data processing function for JSON:</span></p>
+  <p>As we are returning data as application/json, we can process this using JavasScripts JSON object:</p>
+    <pre><code>
+  function processOnePerson(dataJSON, targetIdName) {
+    var jsonArr = JSON.parse(dataJSON);
+    document.getElementById(targetIdName).innerHTML = '';
+    document.getElementById(targetIdName).innerHTML = jsonArr[0].fname + ' ' + jsonArr[0].lname + ', ' + jsonArr[0].badge;
+  }
+    </code></pre>
+  <p>Even though this example is only returning one record from the JSON output, we still handle it as an array/list.</p>
+  <br /><br /><br />
+  
+  
+  
+  
+  <p><span style="font-weight:bold;font-size:16px;">More custom function examples:</span></p>
+  
+  
+  
+    <p><span style="font-weight:bold;">String as a List #1:</span></p>
+    <pre><code>
+  function printListAsString(dataString, targetIdName) {
+    var resultsArr = dataString.split(",");
+    document.getElementById(targetIdName).innerHTML = '';
+    for(i = 0; i < resultsArr.length; i++) {
+        document.getElementById(targetIdName).innerHTML = document.getElementById(targetIdName).innerHTML + resultsArr[i] + ",";
+    }
+  }
+    </code></pre>
+  <p>In this example we are processing a STRING request. This particular function takes a string that is a comma separated list, splits it into an array/list, then processes the array.</p>
+  <br /><br /><br />
+
+  
+    <p><span style="font-weight:bold;">String as a List #2:</span></p>
+    <pre><code>
+  function printListWithBreaks(dataString, targetIdName) {
+    var resultsArr = dataString.split(",");
+    document.getElementById(targetIdName).innerHTML = '';
+    for(i = 0; i < resultsArr.length; i++) {
+        document.getElementById(targetIdName).innerHTML = document.getElementById(targetIdName).innerHTML + resultsArr[i] + "&lt;br /&gt;";
+    }
+  }
+    </code></pre>
+  <p>Exactly the same as above, except that we append each item with a &lt;br /&gt; tag instead of a comma.</p>
+  <br /><br /><br />
+
+    
+    
+    
+    
+  
+    <p><span style="font-weight:bold;">JSON one record as object:</span></p>
+    <pre><code>
+JAVSCRIPT:
+  function processOnePerson(dataJSON, targetIdName) {
+    var jsonArr = JSON.parse(dataJSON);
+    document.getElementById(targetIdName).innerHTML = '';
+    document.getElementById(targetIdName).innerHTML = jsonArr[0].fname + ' ' + jsonArr[0].lname + ', ' + jsonArr[0].badge;
+  }
+  
+JSON:
+[{"lname":"Solo","fname":"Han","badge":"55555"}]
+  
+    </code></pre>
+  <p>This is a simple JSON return of one record as a JSON object.</p>
+  
+  <br /><br /><br />
+    
+  
+    <p><span style="font-weight:bold;">JSON with alist of multiple records as objects:</span></p>
+    <pre><code>
+JAVASCRIPT:
+function processMultiplePeople(dataJSON, targetIdName) {
+    var jsonArr = JSON.parse(dataJSON);
+    document.getElementById(targetIdName).innerHTML = '';
+    for(i = 0; i < jsonArr.length; i++) {
+      document.getElementById(targetIdName).innerHTML = document.getElementById(targetIdName).innerHTML + jsonArr[i].fname + ' ' + jsonArr[i].lname + ', ' + jsonArr[i].badge + '<br />';
+    }
+}
+  
+JSON:
+[
+  {"lname": "Solo",
+	"fname": "Han",
+	"badge": "55555"
+  },
+  {"lname": "Boop",
+	"fname": "Betty",
+	"badge": "44444"
+  },
+  {"lname": "Kabible",
+	"fname": "Ish",
+	"badge": "33333"
+  }
+]
+    </code></pre>
+    <br /><br /><br />
+    
+  
+  
+  
+    <p><span style="font-weight:bold;">JSON with multiple records as nested objects, known length:</span></p>
+    <pre><code>
+JAVASCRIPT:
+function processNestedObjectOfObjects(dataJSON, targetIdName) {
+    var jsonData = JSON.parse(dataJSON);
+    var results = "";
+    for(i = 1; i <= 4; i++) {
+        results = results + jsonData['response'+i].name.fname + ' ' + jsonData['response'+i].name.lname + ', ' + jsonData['response'+i].badge + ', ' + jsonData['response'+i].platoon + '<br />';
+    }
+    document.getElementById(targetIdName).innerHTML = results
+}
+
+JSON:
+{
+    "response1":
+        {
+            "badge":"55555",
+            "name": {"fname":"Jim","lname":"Melanson"},
+            "platoon":"A01"
+        },
+    "response2":
+        {
+            "badge":"44444",
+            "name": {"fname":"Betty","lname":"Boop"},
+            "platoon":"B02"
+        },
+    "response3":
+        {
+            "badge":"33333",
+            "name": {"fname":"Ish","lname":"Kabible"},
+            "platoon":"C03"
+        },
+    "response4":
+        {
+            "badge":"22222",
+            "name": {"fname":"Normy","lname":"Newguy"},
+            "platoon":"D04"
+        }
+}
+    </code></pre>
+    <br /><br /><br />
+    
+    
+    
+    
+    
+    
+    <p><span style="font-weight:bold;">JSON with multiple records as nested objects, unknown length:</span></p>
+    <pre><code>
+JAVASCRIPT:
+function processNestedObjectOfObjectsUnknownLength(dataJSON, targetIdName) {
+    var jsonData = JSON.parse(dataJSON);
+    var results = "";
+    var iterator = 1; //I know that the returned JSON starts number at 1 and not at zero.
+    while(typeof jsonData['response'+iterator] !== "undefined") {
+      results = results + jsonData['response'+iterator].name.fname + ' ' + jsonData['response'+iterator].name.lname + ', ' + jsonData['response'+iterator].badge + ', ' + jsonData['response'+iterator].platoon + '<br />';
+      iterator++;
+      if(iterator > 10) {
+        return;
+      }
+    }
+    document.getElementById(targetIdName).innerHTML = results
+}
+ 
+JSON:
+{
+    "response1":
+        {
+            "badge":"55555",
+            "name": {"fname":"Vito","lname":"Corleone"},
+            "platoon":"A01"
+        },
+    "response2":
+        {
+            "badge":"44444",
+            "name": {"fname":"Michael","lname":"Corleone"},
+            "platoon":"B02"
+        },
+    "response3":
+        {
+            "badge":"33333",
+            "name": {"fname":"Sonny","lname":"Corleone"},
+            "platoon":"C03"
+        },
+    "response4":
+        {
+            "badge":"22222",
+            "name": {"fname":"Tom","lname":"Hagen"},
+            "platoon":"D04"
+        },
+    "response5":
+        {
+            "badge":"11111",
+            "name": {"fname":"Apollonia","lname":"Vitelli-Corleone"},
+            "platoon":"E05"
+        },
+    "response6":
+        {
+            "badge":"66666",
+            "name": {"fname":"Luca","lname":"Brasi"},
+            "platoon":"F06"
+        },
+    "response7":
+        {
+            "badge":"777777",
+            "name": {"fname":"Peter","lname":"Clemenze"},
+            "platoon":"G07"
+        }
+}
+    </code></pre>
+    <br /><br /><br />
+    
+  
+  </body>
+</html>
+
+
+
+

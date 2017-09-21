@@ -1,0 +1,20 @@
+MANIFEST
+=======================================
+
+ajax_test1.cgi
+ajax_test2.cgi
+ajax_test_json1.cgi
+ajax_test_json2.cgi
+ajax_test_json3.cgi
+ajax_test_json4.cgi
+NOTE: Open each of these files and make sure the shebang is pointing to Perl.
+      Save the files, upload as ASCII and CHMOD 755.
+
+ajax.js
+ajax_demo.html
+NOTE: Open ajax_demo.html and change the URL's to point to the scripts above.
+      Save the file, upload both as ASCII to public_html folder or subfolder.
+      Call ajax_demo.html in your web browser.
+
+License: Is included in the header of ajax.js.
+
